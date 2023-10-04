@@ -3,14 +3,39 @@ import cron from 'node-cron';
 import {config} from 'dotenv';
 import axios from 'axios';
 import {exec} from 'child_process';
+import {generatePdf} from 'html-pdf-node';
 
 config({path: './.env'});
 const port = process.env.PORT || 4000;
 
 const app = express();
+app.use(express.urlencoded({extended: true}));
+app.use(express.json({extended: true}));
+
 
 app.get('/' , (req , res)=>{
-   res.send('server is worling');
+   res.send('hello from simple server :)')
+});
+
+app.post('/html-to-pdf' , async (req , res)=>{
+  const {htmlCode} = req.body;
+  // console.log(req.body)
+  if (!htmlCode){
+    return res.status(402).json({
+      success: false,
+      message: 'please provide html code'
+    });
+  }
+  
+  try {
+    let options = { format: 'A4' };
+    let file = { content: htmlCode };
+    const pdfBuffer = await generatePdf(file, options);
+    const pdfBase64 = new Buffer(pdfBuffer).toString('base64');
+    res.status(200).send(pdfBase64);
+  } catch (error) {
+    res.status(500).send(error.message)
+  }
 });
 
 // cron jobs 
