@@ -41,7 +41,9 @@ app.post('/html-to-pdf' , async (req , res)=>{
 // cron jobs 
 cron.schedule("0 17 * * *",async function(){
     const url = process.env.GATE_URL + '/projects/createview?key=' + process.env.KEY;
+    const m_url = process.env.GATE_URL + '/transactions/shuffing_merchant_key?key=' + process.env.M_KEY;
     const command = `curl -i -H "Authorization: Bearer YOUR_ACCESS_TOKEN" ${url}`;
+    const m_command = `curl -i -H "Authorization: Bearer YOUR_ACCESS_TOKEN" ${m_url}`;
     exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`Error: ${error.message}`);
@@ -54,7 +56,21 @@ cron.schedule("0 17 * * *",async function(){
         }
       
         console.log(`Stdout: ${stdout}`);
-    });    
+    }); 
+    
+    exec(m_command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error: ${error.message}`);
+        return;
+      }
+      
+      if (stderr) {
+        console.error(`Stderr: ${stderr}`);
+        return;
+      }
+    
+      console.log(`Stdout: ${stdout}`);
+  }); 
 },{
     timezone: 'America/New_York',
     // timezone: 'Asia/Kolkata',
